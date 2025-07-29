@@ -1,7 +1,7 @@
-package com.example.hceapp;
+package com.codingr.hceapp;
 
-import com.example.hcelibrary.annotations.HceService;
-import com.example.hcelibrary.core.ApduRouterService;
+import com.codingr.nfclib.hce.annotations.HceService;
+import com.codingr.nfclib.hce.core.ApduRouterService;
 
 @HceService(
     description = "My Awesome HCE Service",

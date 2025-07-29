@@ -1,4 +1,4 @@
-package com.example.hceapp;
+package com.codingr.hceapp;
 
 import android.app.Activity;
 import android.os.Bundle;

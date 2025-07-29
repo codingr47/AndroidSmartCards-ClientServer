@@ -1,4 +1,4 @@
-package com.example.hcelibrary.util;
+package com.codingr.nfclib.hce.util;
 
 public class ApduUtil {
 

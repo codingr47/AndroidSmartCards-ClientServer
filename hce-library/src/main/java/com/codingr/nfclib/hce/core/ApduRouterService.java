@@ -1,26 +1,24 @@
-package com.example.hcelibrary.core;
+package com.codingr.nfclib.hce.core;
 
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.nfc.cardemulation.HostApduService;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.example.hcelibrary.annotations.ApduController;
-import com.example.hcelibrary.annotations.ApduMapping;
-import com.example.hcelibrary.util.ApduUtil;
+import com.codingr.nfclib.hce.annotations.ApduController;
+import com.codingr.nfclib.hce.annotations.ApduMapping;
+import com.codingr.nfclib.hce.util.ApduUtil;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-
 import dalvik.system.DexFile;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class ApduRouterService extends HostApduService {
 

@@ -1,4 +1,4 @@
-package com.example.hcelibrary.core;
+package com.codingr.nfclib.hce.core;
 
 public class ApduResponse {
 

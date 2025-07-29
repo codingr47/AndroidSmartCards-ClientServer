@@ -1,6 +1,6 @@
-package com.example.hceprocessor;
+package com.codingr.nfclib.hce.processor;
 
-import com.example.hcelibrary.annotations.HceService;
+import com.codingr.nfclib.hce.annotations.HceService;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
@@ -23,7 +23,7 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
 @AutoService(Processor.class)
-@SupportedAnnotationTypes("com.example.hcelibrary.annotations.HceService")
+@SupportedAnnotationTypes("com.codingr.nfclib.hce.annotations.HceService")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class HceServiceProcessor extends AbstractProcessor {
 
