@@ -1,13 +1,14 @@
 package com.codingr.nfclib.hce.processor;
 
+import com.codingr.nfclib.hce.annotations.ApduController;
 import com.codingr.nfclib.hce.annotations.HceService;
 import com.google.auto.service.AutoService;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -23,25 +24,54 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
 @AutoService(Processor.class)
-@SupportedAnnotationTypes("com.codingr.nfclib.hce.annotations.HceService")
+@SupportedAnnotationTypes({
+    "com.codingr.nfclib.hce.annotations.HceService",
+    "com.codingr.nfclib.hce.annotations.ApduController"
+})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class HceServiceProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        Set<String> allAids = new HashSet<>();
+        List<String> serviceClasses = new ArrayList<>();
+        
+        // Process @HceService annotations
         for (Element element : roundEnv.getElementsAnnotatedWith(HceService.class)) {
             if (element instanceof TypeElement) {
                 TypeElement typeElement = (TypeElement) element;
                 HceService hceService = typeElement.getAnnotation(HceService.class);
-
-                try {
-                    generateAidListXml(hceService.aids());
-                    generateAndroidManifestFragment(typeElement.getQualifiedName().toString(), hceService.description());
-                } catch (IOException e) {
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Could not generate HCE files: " + e.getMessage());
+                
+                for (String aid : hceService.aids()) {
+                    allAids.add(aid);
+                }
+                serviceClasses.add(typeElement.getQualifiedName().toString());
+            }
+        }
+        
+        // Process @ApduController annotations to collect AIDs
+        for (Element element : roundEnv.getElementsAnnotatedWith(ApduController.class)) {
+            if (element instanceof TypeElement) {
+                TypeElement typeElement = (TypeElement) element;
+                ApduController controller = typeElement.getAnnotation(ApduController.class);
+                
+                for (String aid : controller.aids()) {
+                    allAids.add(aid);
                 }
             }
         }
+        
+        // Only generate files if we found controllers or services
+        if (!allAids.isEmpty()) {
+            try {
+                generateAidListXml(allAids.toArray(new String[0]));
+                generateAndroidManifestFragment();
+            } catch (IOException e) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, 
+                    "Could not generate HCE files: " + e.getMessage());
+            }
+        }
+        
         return true;
     }
 
@@ -61,14 +91,27 @@ public class HceServiceProcessor extends AbstractProcessor {
         }
     }
 
-    private void generateAndroidManifestFragment(String serviceName, String serviceDescription) throws IOException {
+    private void generateAndroidManifestFragment() throws IOException {
         FileObject file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "AndroidManifest.xml");
         try (Writer writer = file.openWriter()) {
             writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
             writer.write("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\n");
+            writer.write("\n");
+            writer.write("    <!-- NFC permissions automatically added by HCE library -->\n");
+            writer.write("    <uses-permission android:name=\"android.permission.NFC\" />\n");
+            writer.write("\n");
+            writer.write("    <!-- NFC hardware requirements -->\n");
+            writer.write("    <uses-feature\n");
+            writer.write("        android:name=\"android.hardware.nfc\"\n");
+            writer.write("        android:required=\"true\" />\n");
+            writer.write("    <uses-feature\n");
+            writer.write("        android:name=\"android.hardware.nfc.hce\"\n");
+            writer.write("        android:required=\"true\" />\n");
+            writer.write("\n");
             writer.write("    <application>\n");
+            writer.write("        <!-- HCE Service automatically registered by annotation processor -->\n");
             writer.write("        <service\n");
-            writer.write("            android:name=\"" + serviceName + "\"\n");
+            writer.write("            android:name=\"com.codingr.nfclib.hce.core.ApduRouterService\"\n");
             writer.write("            android:exported=\"true\"\n");
             writer.write("            android:permission=\"android.permission.BIND_NFC_SERVICE\">\n");
             writer.write("            <intent-filter>\n");

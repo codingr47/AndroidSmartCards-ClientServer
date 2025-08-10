@@ -1,0 +1,5 @@
+include ':app'
+include ':hce-library'
+include ':hce-processor'
+
+rootProject.name = "Android Smart Cards Library"
